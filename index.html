@@ -1,0 +1,1010 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>AI Vision Processing Platform</title>
+
+  <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+    :root{
+      --r: 18px;
+      --r2: 14px;
+      --r3: 12px;
+
+      --ink: #0f2238;
+      --muted: #5f738d;
+
+      --line: rgba(31,62,96,.16);
+      --shadow: 0 12px 30px rgba(19,41,61,.10);
+      --shadow-strong: 0 30px 70px rgba(1,13,36,.42);
+
+      --brand-a: #1f67ff;
+      --brand-b: #00a5b9;
+
+      --dark-0:#070c18;
+      --dark-1:#0b1020;
+      --dark-2:#0f1a33;
+      --dark-line: rgba(160,196,255,.14);
+      --dark-text: rgba(255,255,255,.92);
+      --dark-muted: rgba(255,255,255,.62);
+    }
+
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(900px 500px at 0% -10%, rgba(70,151,255,.22), transparent 52%),
+        radial-gradient(900px 500px at 100% 0%, rgba(0,193,213,.15), transparent 50%),
+        linear-gradient(165deg, #eef4fb, #f7f9fc 55%);
+      font-family:"Plus Jakarta Sans","Noto Sans SC","Microsoft YaHei",sans-serif;
+      color: var(--ink);
+    }
+
+    .app-wrap{
+      max-width: 1600px;
+      animation: fadeIn .32s ease-out;
+    }
+    @keyframes fadeIn{ from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+    /* -------- Layout -------- */
+    .sidebar{
+      background: linear-gradient(180deg, rgba(255,255,255,.97), rgba(247,252,255,.92));
+      border-radius: var(--r);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+      position: sticky;
+      top: 14px;
+      backdrop-filter: blur(6px);
+    }
+
+    .preview-shell{
+      background:
+        radial-gradient(90% 120% at 10% 0%, #132a5c, var(--dark-1) 55%),
+        linear-gradient(180deg, var(--dark-1), #081224);
+      border-radius: var(--r);
+      box-shadow: var(--shadow-strong);
+      border: 1px solid rgba(135,164,220,.16);
+      overflow: hidden;
+      position: relative;
+      min-height: calc(100vh - 36px); 
+    }
+    .preview-shell::before{
+      content:"";
+      position:absolute;
+      width: 430px; height: 430px;
+      border-radius:50%;
+      background: radial-gradient(circle, rgba(58,112,255,.22), transparent 66%);
+      top: -240px; right: -90px;
+      pointer-events:none;
+    }
+
+    /* -------- Brand -------- */
+    .brand{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+      padding-bottom: 8px;
+    }
+    .brand-title{ font-weight:900; letter-spacing:.2px; }
+    .brand-sub{ color: var(--muted); font-size: 12px; margin-top:2px; line-height:1.35; }
+    .pill{
+      border-radius:999px;
+      font-weight:800;
+      background: rgba(31,103,255,.12);
+      border: 1px solid rgba(31,103,255,.20);
+      color:#1247a5;
+      padding: 4px 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    /* -------- Section -------- */
+    .section-title{
+      font-weight:900;
+      font-size: 13px;
+      letter-spacing: .2px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom: 10px;
+    }
+    .section-hint{ color: var(--muted); font-size: 12px; line-height: 1.35; }
+
+    .form-select, .form-control{
+      border-radius: var(--r3);
+      border-color: #c7d6ea;
+      background-color: #fcfeff;
+      box-shadow: none !important;
+      height: 40px;
+      font-size: 13px;
+    }
+    .form-control::placeholder{ color: rgba(40,70,110,.45); }
+    .form-select:focus, .form-control:focus{
+      border-color: #5e9dff;
+      box-shadow: 0 0 0 3px rgba(72,142,255,.18) !important;
+    }
+
+    .card-soft{
+      background: linear-gradient(180deg, #f8fbff, #f1f7ff);
+      border: 1px solid #cddcf0;
+      border-radius: var(--r2);
+      padding: 10px;
+    }
+
+    .sidebar .mb-3{ margin-bottom: 14px !important; }
+    hr{ opacity:.12; }
+
+    /* -------- Buttons -------- */
+    .btn{ border-radius: var(--r3); transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
+    .btn:hover{ transform: translateY(-1px); filter: saturate(1.05); }
+    .btn-strong{
+      background: linear-gradient(120deg, var(--brand-a), var(--brand-b));
+      border: 0;
+      box-shadow: 0 14px 30px rgba(27,99,255,.30);
+      color:#fff;
+      height: 44px;
+      font-size: 14px;
+      letter-spacing: .3px;
+    }
+    .btn-strong:disabled{ opacity:.78; }
+
+    /* -------- Dropzone -------- */
+    .dropzone{
+      border: 1.5px dashed rgba(34,87,148,.28);
+      border-radius: var(--r2);
+      padding: 12px;
+      background: linear-gradient(180deg, #f8fbff, #f3f8ff);
+      cursor: pointer;
+      transition: .22s ease;
+    }
+    .dropzone:hover{
+      border-color:#2f80ff;
+      background:#eef5ff;
+      transform: translateY(-1px);
+    }
+    .dropzone.dragover{
+      border-color:#2f80ff;
+      background:#e7f1ff;
+      box-shadow: 0 10px 26px rgba(33,107,248,.16);
+    }
+
+    .file-picker{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-top:10px;
+    }
+    .file-picker-btn{
+      border: 1px solid #c7d6ea;
+      background:#fff;
+      color: var(--ink);
+      padding: 8px 14px;
+      border-radius: var(--r3);
+      font-size: 13px;
+      font-weight: 700;
+      cursor:pointer;
+      white-space: nowrap;
+    }
+    .file-picker-name{
+      flex:1;
+      min-width:0;
+      height:40px;
+      display:flex;
+      align-items:center;
+      padding: 0 12px;
+      border: 1px solid #c7d6ea;
+      border-radius: var(--r3);
+      background:#fcfeff;
+      color: rgba(40,70,110,.72);
+      font-size: 13px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .visually-hidden-input{
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+      border:0;
+    }
+
+    /* -------- Preview Topbar -------- */
+    .preview-topbar{
+      background: linear-gradient(180deg, rgba(13,24,49,.92), rgba(13,24,49,.62));
+      border-bottom: 1px solid rgba(164,191,240,.22);
+      padding: 12px 14px;
+      display:flex; align-items:center; justify-content:space-between; gap: 10px;
+      position: relative;
+      z-index: 2;
+    }
+    .top-left{
+      display:flex; align-items:center; gap:10px;
+      color: var(--dark-text);
+      min-width: 320px;
+    }
+    .tag{
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(64,131,255,.22);
+      border: 1px solid rgba(131,178,255,.45);
+      font-weight: 900;
+      letter-spacing:.2px;
+    }
+    .top-sub{
+      color: var(--dark-muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 520px;
+    }
+
+    .seg{
+      display:inline-flex;
+      gap: 4px;
+      padding: 5px;
+      border-radius: 999px;
+      background: rgba(110,150,220,.14);
+      border: 1px solid rgba(186,212,255,.30);
+      backdrop-filter: blur(6px);
+      align-items:center;
+    }
+    .seg button{
+      border: 0;
+      background: transparent;
+      color: rgba(225,240,255,.90);
+      font-weight: 900;
+      font-size: 12px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      transition: .18s ease;
+      display:flex; align-items:center; gap:6px;
+      letter-spacing:.2px;
+      opacity: .92;
+    }
+    .seg button:hover{ background: rgba(90,135,210,.18); }
+    .seg button.active{
+      background: linear-gradient(120deg, #3f8dff, #2ec0e8);
+      color:#fff;
+      box-shadow: 0 10px 22px rgba(48,148,255,.38);
+      transform: translateY(-0.5px);
+      opacity: 1;
+    }
+
+    .preview-body{
+      position: relative;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: linear-gradient(90deg, rgba(136,162,208,.24), rgba(136,162,208,.12));
+      min-height: calc(100vh - 80px);
+    }
+
+    .pane{
+      background:
+        radial-gradient(140% 100% at 100% -10%, rgba(43,89,190,.25), transparent 44%),
+        linear-gradient(180deg, var(--dark-0) 0%, var(--dark-2) 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .pane::after{
+      content:"";
+      position:absolute;
+      inset: 10px;
+      border-radius: 16px;
+      border: 1px solid var(--dark-line);
+      pointer-events:none;
+    }
+    .pane .label{
+      position:absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 12px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(144,178,245,.20);
+      border: 1px solid rgba(206,224,255,.34);
+      color: rgba(255,255,255,.90);
+      backdrop-filter: blur(6px);
+      letter-spacing:.3px;
+      font-weight: 900;
+      z-index: 2;
+    }
+
+    .pane-media{
+      width: 100%;
+      height: calc(100vh - 160px); 
+      max-height: 760px;
+      min-height: 520px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      padding: 10px;
+    }
+    .pane-media::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(900px 500px at 18% 8%, rgba(64,131,255,.18), transparent 55%),
+        radial-gradient(800px 500px at 90% 30%, rgba(46,192,232,.12), transparent 55%),
+        repeating-linear-gradient(135deg, rgba(255,255,255,.035) 0px, rgba(255,255,255,.035) 2px, transparent 2px, transparent 10px);
+      opacity: .9;
+      pointer-events:none;
+    }
+
+    .pane-media img,
+    .pane-media video{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 14px;
+      background: transparent;
+      border: 0;
+      box-shadow: 0 22px 60px rgba(0,0,0,.45);
+      transition: transform .25s ease, box-shadow .25s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .pane-media img:hover, .pane-media video:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 30px 70px rgba(0,0,0,.50);
+    }
+
+    .empty{
+      text-align:center;
+      color: var(--dark-muted);
+      max-width: 460px;
+      padding: 20px;
+      z-index: 1;
+    }
+    .empty .title{
+      color: rgba(255,255,255,.90);
+      font-weight: 900;
+      letter-spacing: .2px;
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+    .empty .desc{ font-size: 12px; line-height: 1.45; }
+    .empty .kbd{
+      display:inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.86);
+      font-weight: 900;
+      font-size: 12px;
+      margin: 0 2px;
+    }
+
+    /* Loading */
+    .loading-overlay{
+      position:absolute;
+      inset:0;
+      background: rgba(3,9,20,.70);
+      display:none;
+      flex-direction:column;
+      color:#fff;
+      justify-content:center;
+      align-items:center;
+      z-index: 10;
+      backdrop-filter: blur(3px);
+    }
+
+    /* Status */
+    .status-box{
+      margin-top: 12px;
+      border-radius: var(--r2);
+      border: 1px solid rgba(31,62,96,.14);
+      background: rgba(255,255,255,.88);
+      box-shadow: var(--shadow);
+      padding: 10px 12px;
+    }
+    .status-row{
+      display:flex; align-items:center; justify-content:space-between;
+      gap: 10px;
+      font-size: 12px;
+    }
+    .status-label{ color: var(--muted); }
+    .status-value.badge{
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 900;
+      border: 1px solid transparent;
+    }
+    .badge-wait{ background: rgba(13,71,161,.10); color:#0e477f; border-color: rgba(13,71,161,.18); }
+    .badge-run{ background: rgba(31,103,255,.16); color:#1f67ff; border-color: rgba(31,103,255,.22); }
+    .badge-ok{ background: rgba(46,160,67,.16); color:#2ea043; border-color: rgba(46,160,67,.22); }
+    .badge-bad{ background: rgba(255,77,79,.14); color:#ff4d4f; border-color: rgba(255,77,79,.22); }
+
+    .status-detail{
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #f5f9ff;
+      border-radius: 12px;
+      border: 1px solid #d9e7f8;
+      font-size: 12px;
+      color: #355a82;
+      white-space: pre-wrap;
+    }
+
+    /* Footer hint under preview */
+    .foot-hint{
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(15,34,56,.58);
+    }
+    .foot-hint code{ color: #d23c3c; }
+
+    /* Responsive */
+    @media (max-width: 992px){
+      .preview-shell{ min-height: 780px; }
+      .preview-body{ grid-template-columns: 1fr; min-height: 700px; }
+      .sidebar{ position: static; }
+      .pane-media{ height: 62vh; min-height: 420px; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="container-fluid py-3 app-wrap">
+  <div class="row g-3">
+    <!-- Sidebar -->
+    <div class="col-lg-3">
+      <div class="sidebar">
+        <div class="brand">
+          <div>
+            <div class="brand-title">AI Vision Processing Platform</div>
+            <div class="brand-sub">ONNX | Image/Video | Detection/Segmentation/Tracking/Enhancement/Style</div>
+          </div>
+          <span class="pill">v3.5</span>
+        </div>
+
+        <hr class="my-3">
+
+        <!-- 1 Task -->
+        <div class="mb-3">
+          <div class="section-title">
+            <span>1) Task Type</span>
+            <span class="section-hint" id="taskHint">-</span>
+          </div>
+          <select id="taskMode" class="form-select">
+            <optgroup label="Enhancement / Restoration / Style">
+              <option value="superres">Super Resolution (SR)</option>
+              <option value="dehaze">Dehaze</option>
+              <option value="derain">Derain</option>
+              <option value="desnow">Desnow</option>
+              <option value="underwater">Underwater Enhancement</option>
+              <option value="old_photo">Old Photo Restoration</option>
+              <option value="colorization">Colorization</option>
+              <option value="style">Style Transfer</option>
+            </optgroup>
+            <optgroup label="Object Analysis (YOLO)">
+              <option value="detect">Object Detection (YOLO Detect)</option>
+              <option value="segment">Instance Segmentation (YOLO Segment)</option>
+              <option value="track">Detection + Tracking (YOLO + Tracker)</option>            </optgroup>
+          </select>
+          <div class="section-hint mt-1">Automatically uses <span class="fw-bold">/process_image</span> or <span class="fw-bold">/process_video</span> based on media type</div>
+        </div>
+
+        <!-- 2 Model -->
+        <div class="mb-3">
+          <div class="section-title">
+            <span>2) Model Selection (ONNX)</span>
+            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="resetModelToDefault()">Default</button>
+          </div>
+          <select id="modelSelect" class="form-select"></select>
+          <div class="section-hint mt-1" id="modelHint">Available model list changes automatically with the selected task</div>
+        </div>
+
+        <!-- 3 Params -->
+        <div class="mb-3">
+          <div class="section-title">
+            <span>3) Parameters</span>
+            <span class="section-hint">Optional</span>
+          </div>
+
+          <!-- Vision params -->
+          <div id="visionParams" class="card-soft" style="display:none">
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label small fw-bold mb-1">Confidence</label>
+                <input id="conf" type="number" class="form-control" step="0.01" min="0" max="1" value="0.25">
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold mb-1">NMS iou</label>
+                <input id="iou" type="number" class="form-control" step="0.01" min="0" max="1" value="0.45">
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold mb-1">Max Detections</label>
+                <input id="maxDet" type="number" class="form-control" min="1" max="500" value="100">
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold mb-1">Class Filter</label>
+                <input id="classes" type="text" class="form-control" placeholder="Example: 0,2,3 (optional)">
+              </div>
+              <div class="col-12" id="trackerRow" style="display:none">
+                <label class="form-label small fw-bold mb-1">Tracker</label>
+                <select id="trackerType" class="form-select">
+                  <option value="bytetrack">ByteTrack</option>
+                  <option value="deepsort">DeepSORT</option>
+                  <option value="ocsort">OC-SORT</option>
+                </select>
+                <div class="section-hint mt-1">Only applies in Detection + Tracking mode</div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- toggles -->
+          <div class="row g-2 mt-2">
+            <div class="col-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="drawTrail" checked>
+                <label class="form-check-label small fw-bold" for="drawTrail">Trail Lines</label>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="fixedColor" checked>
+                <label class="form-check-label small fw-bold" for="fixedColor">Fixed ID Colors</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Restore params -->
+          <div id="restoreParams" class="card-soft mt-2">
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label small fw-bold mb-1">Output Format</label>
+                <select id="imgFormat" class="form-select">
+                  <option value="auto">Auto</option>
+                  <option value="jpg">JPG</option>
+                  <option value="png">PNG</option>
+                </select>
+              </div>
+              <div class="col-6" id="srScaleRow">
+                <label class="form-label small fw-bold mb-1">SR Scale</label>
+                <select id="srScale" class="form-select">
+                  <option value="2">x2</option>
+                  <option value="4">x4</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-bold mb-1">Note (Optional)</label>
+                <input id="note" class="form-control" placeholder="The frontend forwards the note field to the backend (optional)">
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 4 Upload -->
+        <div class="mb-3">
+          <div class="section-title">
+            <span>4) Upload Media</span>
+            <button class="btn btn-sm btn-outline-danger" type="button" onclick="clearAll()">Clear</button>
+          </div>
+
+          <div id="dropzone" class="dropzone">
+            <div class="d-flex align-items-center gap-2">
+              <div class="flex-grow-1">
+                <div class="fw-bold">Drag files here</div>
+                <div class="section-hint">Or click to choose files (supports images / MP4 video)</div>
+              </div>
+              <span class="badge text-bg-secondary">Drag</span>
+            </div>
+            <input type="file" id="fileInput" class="visually-hidden-input" accept="image/*,video/*">
+            <div class="file-picker">
+              <button type="button" class="file-picker-btn" id="filePickerBtn">Choose File</button>
+              <div class="file-picker-name" id="filePickerName">No file chosen</div>
+            </div>
+          </div>
+
+          <div class="section-hint mt-2" id="fileInfo">No file selected</div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-grid gap-2">
+          <button id="runBtn" onclick="process()" class="btn btn-strong fw-bold">
+            Run
+          </button>
+          <button id="dlBtn" class="btn btn-outline-primary fw-bold" style="display:none;height:44px;">
+            Save Result
+          </button>
+        </div>
+
+        <!-- Status -->
+        <div class="status-box">
+          <div class="status-row">
+            <span class="status-label">Status</span>
+            <span id="status" class="status-value badge badge-wait">Waiting</span>
+          </div>
+          <div class="status-detail" id="statusDetail">Choose a task, model, and file</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="col-lg-9">
+      <div class="preview-shell">
+        <div class="preview-topbar">
+          <div class="top-left">
+            <span class="tag">Preview</span>
+            <span class="top-sub" id="previewHint">Original / Result Comparison</span>
+          </div>
+
+          <div class="seg" role="group" aria-label="preview toggle">
+            <button type="button" id="layoutSplitBtn" class="active" onclick="toggleLayout('split')">Split</button>
+            <button type="button" id="layoutResultBtn" onclick="toggleLayout('result')">Result</button>
+            <button type="button" id="layoutOriginBtn" onclick="toggleLayout('origin')">Original</button>
+          </div>
+        </div>
+
+        <div class="preview-body" id="previewBody">
+          <div class="loading-overlay" id="loader">
+            <div class="spinner-border text-light mb-2"></div>
+            <div class="fw-bold">AI is processing...</div>
+            <div class="small text-white-50 mt-1" id="loaderText">Please wait</div>
+          </div>
+
+          <div class="pane" id="originPane">
+            <div class="label">Original</div>
+            <div id="originArea" class="pane-media">
+              <div class="empty">
+                <div class="title">No media yet</div>
+                <div class="desc">Drop a file into the upload area on the left, or click <span class="kbd">Choose File</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pane" id="resultPane">
+            <div class="label">Result</div>
+            <div id="resultArea" class="pane-media">
+              <div class="empty">
+                <div class="title">Results will appear here</div>
+                <div class="desc">Upload media, then click <span class="kbd">Run</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot-hint">
+        Tip: if the backend returns video, set the response header to <code>Content-Type: video/mp4</code> so the frontend can detect it correctly.
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const MODEL_ZOO = {
+    superres: [{ id: "sr_x4", name: "Real-ESRGAN x4 (realesrgan-x4plus.onnx)", onnx: "realesrgan-x4plus.onnx" }],
+    dehaze: [{ id: "dehazeformer", name: "DehazeFormer (dehazeformer-s-final.onnx)", onnx: "dehazeformer-s-final.onnx" }],
+    derain: [{ id: "restormer_rain", name: "Restormer Rain/Snow (restormer_rain_raw.onnx)", onnx: "restormer_rain_raw.onnx" }],
+    desnow: [{ id: "restormer_snow", name: "Restormer Rain/Snow (restormer_rain_raw.onnx)", onnx: "restormer_rain_raw.onnx" }],
+    underwater: [{ id: "funie_gan", name: "FUNIE-GAN (funie_gan_sim.onnx)", onnx: "funie_gan_sim.onnx" }],
+    old_photo: [{ id: "realesr_general", name: "Real-ESRGAN x4 (realesrgan-x4plus.onnx)", onnx: "realesrgan-x4plus.onnx" }],
+    colorization: [{ id: "deoldify_artistic", name: "DeOldify Artistic (deoldify_artistic_512.onnx)", onnx: "deoldify_artistic_512.onnx" }],
+    style: [
+      { id: "style_candy", name: "Style: Candy (style_candy.onnx)", onnx: "style_candy.onnx" },
+      { id: "style_mosaic", name: "Style: Mosaic (style_mosaic.onnx)", onnx: "style_mosaic.onnx" },
+      { id: "style_rain_princess", name: "Style: Rain Princess (style_rain_princess.onnx)", onnx: "style_rain_princess.onnx" },
+      { id: "style_udnie", name: "Style: Udnie (style_udnie.onnx)", onnx: "style_udnie.onnx" }
+    ],
+    detect: [{ id: "yolov8n", name: "YOLOv8n Detect (yolov8n.onnx)", onnx: "yolov8n.onnx" }],
+    segment: [{ id: "yolov8n_seg", name: "YOLOv8n Seg (yolov8n-seg.onnx)", onnx: "yolov8n-seg.onnx" }],
+    track: [{ id: "yolov8n_track", name: "YOLOv8n Detect + Track (yolov8n.onnx)", onnx: "yolov8n.onnx" }]
+  };
+
+  let currentResultUrl = null;
+  let currentOriginUrl = null;
+
+  const el = (id) => document.getElementById(id);
+
+  function setStatus(text, detail = "") {
+    const s = el("status");
+    s.className = "status-value badge";
+    if (text.includes("Success")) s.classList.add("badge-ok");
+    else if (text.includes("Processing")) s.classList.add("badge-run");
+    else if (text.includes("Failed")) s.classList.add("badge-bad");
+    else s.classList.add("badge-wait");
+    s.innerText = text;
+    el("statusDetail").innerText = detail || "-";
+  }
+
+  function showLoader(show, text = "") {
+    el("loader").style.display = show ? "flex" : "none";
+    el("loaderText").innerText = text || "Please wait";
+  }
+
+  function revokeUrlSafe(url) {
+    try { if (url) URL.revokeObjectURL(url); } catch (_) {}
+  }
+
+  function renderMedia(container, url, isVideo) {
+    if (!url) return;
+    container.innerHTML = isVideo
+      ? `<video src="${url}" controls autoplay muted playsinline loop></video>`
+      : `<img src="${url}" alt="preview">`;
+  }
+
+  function toggleLayout(mode) {
+    const body = el("previewBody");
+    const origin = el("originPane");
+    const result = el("resultPane");
+    const btnSplit = el("layoutSplitBtn");
+    const btnRes = el("layoutResultBtn");
+    const btnOrg = el("layoutOriginBtn");
+    [btnSplit, btnRes, btnOrg].forEach((b) => b.classList.remove("active"));
+
+    if (mode === "split") {
+      body.style.gridTemplateColumns = "1fr 1fr";
+      origin.style.display = "flex";
+      result.style.display = "flex";
+      btnSplit.classList.add("active");
+      el("previewHint").innerText = "Original / Result Comparison";
+    } else if (mode === "result") {
+      body.style.gridTemplateColumns = "1fr";
+      origin.style.display = "none";
+      result.style.display = "flex";
+      btnRes.classList.add("active");
+      el("previewHint").innerText = "Result Only";
+    } else {
+      body.style.gridTemplateColumns = "1fr";
+      origin.style.display = "flex";
+      result.style.display = "none";
+      btnOrg.classList.add("active");
+      el("previewHint").innerText = "Original Only";
+    }
+  }
+
+  function populateModels(mode) {
+    const list = MODEL_ZOO[mode] || [];
+    const sel = el("modelSelect");
+    sel.innerHTML = "";
+    if (!list.length) {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "No model configured";
+      sel.appendChild(opt);
+      return;
+    }
+    list.forEach((m) => {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = m.name;
+      opt.dataset.onnx = m.onnx;
+      sel.appendChild(opt);
+    });
+  }
+
+  function getSelectedModel() {
+    const sel = el("modelSelect");
+    const opt = sel.options[sel.selectedIndex];
+    return { model_id: sel.value, onnx: opt ? opt.dataset.onnx : "" };
+  }
+
+  function updateTaskUI() {
+    const mode = el("taskMode").value;
+    const hint = {
+      superres: "Super Resolution",
+      dehaze: "Dehaze",
+      derain: "Derain",
+      desnow: "Desnow",
+      underwater: "Underwater Enhancement",
+      old_photo: "Old Photo Restoration",
+      colorization: "Colorization",
+      style: "Style Transfer",
+      detect: "Object Detection",
+      segment: "Instance Segmentation",
+      track: "Detection + Tracking"
+    };
+    const isVision = ["detect", "segment", "track"].includes(mode);
+
+    el("taskHint").innerText = hint[mode] || "-";
+    el("visionParams").style.display = isVision ? "block" : "none";
+    el("restoreParams").style.display = isVision ? "none" : "block";
+    el("trackerRow").style.display = mode === "track" ? "block" : "none";
+    el("srScaleRow").style.display = mode === "superres" ? "block" : "none";
+    el("modelHint").innerText = isVision
+      ? "Select a detection / segmentation / tracking model (ONNX)"
+      : "Select an enhancement / restoration / style model (ONNX)";
+
+    populateModels(mode);
+  }
+
+  function updateFileInfo(file) {
+    const pickerName = el("filePickerName");
+    if (!file) {
+      el("fileInfo").innerText = "No file selected";
+      if (pickerName) pickerName.innerText = "No file chosen";
+      return;
+    }
+    const mb = (file.size / (1024 * 1024)).toFixed(2);
+    el("fileInfo").innerText = `${file.name} | ${file.type || "unknown"} | ${mb} MB`;
+    if (pickerName) pickerName.innerText = file.name;
+  }
+
+  function setOriginPreview(file) {
+    const originArea = el("originArea");
+    if (!file) {
+      revokeUrlSafe(currentOriginUrl);
+      currentOriginUrl = null;
+      originArea.innerHTML = `
+        <div class="empty">
+          <div class="title">No media yet</div>
+          <div class="desc">Drop a file into the upload area on the left, or click <span class="kbd">Choose File</span></div>
+        </div>`;
+      return;
+    }
+
+    const isVideo = (file.type || "").includes("video");
+    revokeUrlSafe(currentOriginUrl);
+    currentOriginUrl = URL.createObjectURL(file);
+    renderMedia(originArea, currentOriginUrl, isVideo);
+  }
+
+  function resetModelToDefault() {
+    el("modelSelect").selectedIndex = 0;
+  }
+
+  function clearAll() {
+    el("fileInput").value = "";
+    updateFileInfo(null);
+    setOriginPreview(null);
+    revokeUrlSafe(currentResultUrl);
+    currentResultUrl = null;
+    el("resultArea").innerHTML = `
+      <div class="empty">
+        <div class="title">Results will appear here</div>
+        <div class="desc">Upload media, then click <span class="kbd">Run</span></div>
+      </div>`;
+    el("dlBtn").style.display = "none";
+    setStatus("Cleared", "Please upload media again");
+  }
+
+  function parseFilenameFromCD(contentDisposition) {
+    if (!contentDisposition) return "";
+    const m1 = contentDisposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+    if (m1 && m1[1]) return decodeURIComponent(m1[1].trim().replace(/["']/g, ""));
+    const m2 = contentDisposition.match(/filename\s*=\s*([^;]+)/i);
+    if (m2 && m2[1]) return m2[1].trim().replace(/["']/g, "");
+    return "";
+  }
+
+  function downloadBlobUrl(url, filename) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename || `AI_Result_${Date.now()}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  async function process() {
+    const file = el("fileInput").files[0];
+    if (!file) return alert("Please upload a file first");
+
+    const mode = el("taskMode").value;
+    const isVideo = (file.type || "").includes("video");
+    const endpoint = isVideo ? "/process_video" : "/process_image";
+    const model = getSelectedModel();
+    if (!model.model_id) return alert("No model is configured for the current task");
+
+    el("runBtn").disabled = true;
+    el("runBtn").innerText = "Running...";
+    showLoader(true, "Uploading and inferencing...");
+    setStatus("Processing", `Endpoint: ${endpoint}\nMode: ${mode}\nModel: ${model.model_id}`);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("mode", mode);
+    formData.append("model_id", model.model_id);
+    formData.append("onnx", model.onnx);
+
+    if (["detect", "segment", "track"].includes(mode)) {
+      formData.append("conf", el("conf").value);
+      formData.append("iou", el("iou").value);
+      formData.append("max_det", el("maxDet").value);
+      formData.append("classes", el("classes").value || "");
+      if (mode === "track") {
+        formData.append("tracker", el("trackerType").value);
+        formData.append("draw_trail", el("drawTrail").checked ? "1" : "0");
+        formData.append("fixed_color", el("fixedColor").checked ? "1" : "0");
+      }
+    } else {
+      formData.append("img_format", el("imgFormat").value);
+      if (mode === "superres") formData.append("sr_scale", el("srScale").value);
+      formData.append("note", el("note").value || "");
+    }
+
+    try {
+      const resp = await fetch(endpoint, { method: "POST", body: formData });
+      if (!resp.ok) {
+        const t = await resp.text().catch(() => "");
+        throw new Error(`Server error: HTTP ${resp.status} ${resp.statusText}\n${t}`);
+      }
+
+      const cd = resp.headers.get("Content-Disposition") || "";
+      const filenameFromCD = parseFilenameFromCD(cd);
+      const contentType = resp.headers.get("Content-Type") || "";
+      const fallbackMime = isVideo ? "video/mp4" : "image/jpeg";
+      const mime = (contentType && contentType !== "application/octet-stream") ? contentType : fallbackMime;
+      const buf = await resp.arrayBuffer();
+      const blob = new Blob([buf], { type: mime });
+
+      revokeUrlSafe(currentResultUrl);
+      currentResultUrl = URL.createObjectURL(blob);
+      renderMedia(el("resultArea"), currentResultUrl, isVideo);
+
+      const dlBtn = el("dlBtn");
+      dlBtn.style.display = "block";
+      const ext = isVideo ? "mp4" : (el("imgFormat").value === "png" ? "png" : "jpg");
+      const safeName = filenameFromCD || `AI_Result_${mode}_${model.model_id}_${Date.now()}.${ext}`;
+      dlBtn.onclick = () => downloadBlobUrl(currentResultUrl, safeName);
+
+      setStatus("Success", `Returned: ${mime}\nFilename: ${safeName}`);
+    } catch (e) {
+      alert(e.message || String(e));
+      setStatus("Failed", e.message || "Unknown error");
+    } finally {
+      showLoader(false);
+      el("runBtn").disabled = false;
+      el("runBtn").innerText = "Run";
+    }
+  }
+
+  const pickerBtn = el("filePickerBtn");
+  if (pickerBtn) pickerBtn.addEventListener("click", () => el("fileInput").click());
+
+  const dropzone = el("dropzone");
+  dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("dragover"); });
+  dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+  dropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("dragover");
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) {
+      el("fileInput").files = e.dataTransfer.files;
+      updateFileInfo(file);
+      setOriginPreview(file);
+      setStatus("File Selected", "Click Run to start inference");
+    }
+  });
+
+  el("fileInput").addEventListener("change", () => {
+    const file = el("fileInput").files[0];
+    updateFileInfo(file);
+    setOriginPreview(file);
+    if (file) setStatus("File Selected", "Click Run to start inference");
+  });
+
+  el("taskMode").addEventListener("change", updateTaskUI);
+
+  window.addEventListener("beforeunload", () => {
+    revokeUrlSafe(currentResultUrl);
+    revokeUrlSafe(currentOriginUrl);
+  });
+
+  updateTaskUI();
+  toggleLayout("split");
+  setStatus("Waiting", "Choose a task, model, and file");
+</script>
+</body>
+</html>
