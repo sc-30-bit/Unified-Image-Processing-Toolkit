@@ -27,7 +27,13 @@ Built with ONNX Runtime, OpenCV, and FFmpeg, with a lightweight local web UI for
 
 ### Tracking
 
-- Demo video: [figs/tracking.mp4](https://github.com/user-attachments/assets/d2f79049-64ec-4f50-8675-e721d3980909)
+<video
+  src="https://github.com/user-attachments/assets/d2f79049-64ec-4f50-8675-e721d3980909"
+  controls
+  muted
+  playsinline
+  style="max-width:100%;">
+</video>
 
 ## What It Does
 
