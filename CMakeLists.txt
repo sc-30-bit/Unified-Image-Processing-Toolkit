@@ -7,15 +7,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(Unified_IP
-    main.cpp
-    basemodel.cpp
-    yolo.cpp
-    restoration.cpp
-    colorizer.cpp
+    src/main.cpp
+    src/basemodel.cpp
+    src/yolo.cpp
+    src/restoration.cpp
+    src/colorizer.cpp
 )
 
 target_include_directories(Unified_IP PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 find_package(OpenCV QUIET COMPONENTS core imgproc imgcodecs videoio dnn)
@@ -105,10 +105,10 @@ endif()
 if(WIN32)
     target_link_libraries(Unified_IP PRIVATE ws2_32 crypt32)
 
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/index.html")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/web/index.html")
         add_custom_command(TARGET Unified_IP POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${CMAKE_CURRENT_SOURCE_DIR}/index.html"
+                "${CMAKE_CURRENT_SOURCE_DIR}/web/index.html"
                 "$<TARGET_FILE_DIR:Unified_IP>/index.html"
         )
     endif()

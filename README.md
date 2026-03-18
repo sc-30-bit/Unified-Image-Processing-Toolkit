@@ -27,7 +27,7 @@ Built with ONNX Runtime, OpenCV, and FFmpeg, with a lightweight local web UI for
 
 ### Tracking
 
-- Demo video: [figs/tracking.mp4](figs/tracking.mp4)
+- Demo video: [figs/tracking.mp4](https://github.com/user-attachments/assets/d2f79049-64ec-4f50-8675-e721d3980909)
 
 ## What It Does
 
@@ -79,14 +79,26 @@ http://localhost:8080
 
 ```text
 .
-+-- main.cpp
 +-- CMakeLists.txt
-+-- basemodel.h
-+-- yolo.cpp / yolo.h
-+-- restoration.cpp / restoration.h
-+-- colorizer.cpp / colorizer.h
-+-- tracker.h
-+-- index.html
++-- README.md
++-- LICENSE
++-- include/
+|   +-- basemodel.h
+|   +-- colorizer.h
+|   +-- draw_utils.h
+|   +-- httplib.h
+|   +-- ModelTypes.h
+|   +-- restoration.h
+|   +-- tracker.h
+|   \-- yolo.h
++-- src/
+|   +-- basemodel.cpp
+|   +-- colorizer.cpp
+|   +-- main.cpp
+|   +-- restoration.cpp
+|   \-- yolo.cpp
++-- web/
+|   \-- index.html
 +-- figs/
 \-- weights/   # local only, not committed
 ```
