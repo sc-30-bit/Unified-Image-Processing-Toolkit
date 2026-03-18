@@ -117,4 +117,4 @@ http://localhost:8080
 
 ## License
 
-See [`Apache License 2.0`](LICENSE).
+[`Apache License 2.0`](LICENSE).
