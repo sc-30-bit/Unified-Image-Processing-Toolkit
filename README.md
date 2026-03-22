@@ -113,7 +113,6 @@ http://localhost:8080
 
 - Model weights are not committed to this repository.
 - Third-party runtime binaries should be downloaded separately.
-- Replace the placeholder download links above before publishing.
 
 ## License
 
